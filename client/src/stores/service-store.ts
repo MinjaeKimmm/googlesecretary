@@ -12,9 +12,9 @@ interface StoreState {
 }
 
 const getInitialMessages = (service: ServiceType): Message[] => ({
-  calendar: [{ role: 'assistant' as const, content: "👋 Hi! I'm your Calendar Assistant. How can I help you manage your schedule?" }],
-  drive: [{ role: 'assistant' as const, content: "👋 Hi! I'm your Drive Assistant. I can help you manage your files and folders." }],
-  email: [{ role: 'assistant' as const, content: "👋 Hi! I'm your Email Assistant. Need help with your emails?" }]
+  calendar: [{ role: 'assistant' as const, content: "Hi! I'm your Calendar Assistant. How can I help you manage your schedule?" }],
+  drive: [{ role: 'assistant' as const, content: "Hi! I'm your Drive Assistant. I can help you manage your files and folders." }],
+  email: [{ role: 'assistant' as const, content: "Hi! I'm your Email Assistant. Need help with your emails?" }]
 }[service]);
 
 const initialState: ServiceState = {

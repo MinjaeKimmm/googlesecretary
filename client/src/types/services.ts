@@ -14,6 +14,7 @@ export interface ChatState {
 export interface ServiceSetup {
   selectedCalendarId?: string;
   selectedFolderId?: string;
+  selectedFolderPath?: string;
 }
 
 export interface ServiceStatus {
@@ -40,6 +41,7 @@ export interface ServiceState {
   };
   drive: {
     selectedFolderId: string;
+    selectedFolderPath?: string;
     chat: ChatState;
   };
   email: {

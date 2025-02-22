@@ -21,7 +21,7 @@ export function ServiceStatus({ service }: ServiceStatusProps) {
       if (!session?.accessToken) {
         throw new Error('No access token available');
       }
-      const response = await apiClient.post(`/api/auth/${service}/setup`, {
+      const response = await apiClient.post(`/api/${service}/setup`, {
         credential: session.accessToken,
         folderId: service === 'drive' ? 'root' : undefined
       }, {

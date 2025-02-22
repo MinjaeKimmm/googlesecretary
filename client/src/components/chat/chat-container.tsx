@@ -44,7 +44,7 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
     setIsRecording(true);
     speechRecognition.start();
 
-    speechRecognition.onresult = (event) => {
+    speechRecognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       console.log(`🎙️ [${language}] 음성 인식 결과:`, transcript);
       setInput(transcript);
@@ -54,7 +54,7 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
       setIsRecording(false);
     };
 
-    speechRecognition.onerror = (event) => {
+    speechRecognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error("Speech recognition error:", event);
       setIsRecording(false);
     };
