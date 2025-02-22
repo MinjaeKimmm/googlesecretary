@@ -5,6 +5,7 @@ import { ServiceType } from '@/types/services';
 import { MessageList } from './message-list';
 import { MessageInput } from './message-input';
 import { useServiceStore } from '@/stores/service-store';
+import VrmViewer from '../vrm/vrmViewer';
 
 interface ChatContainerProps {
   service: ServiceType;
@@ -16,6 +17,9 @@ export function ChatContainer({ service }: ChatContainerProps) {
 
   return (
     <div className="flex flex-col h-[600px] border border-gray-200 rounded-lg bg-white">
+      <div className="h-1/2">
+        <VrmViewer />
+      </div>
       <div className="flex-1 overflow-y-auto p-4">
         <MessageList messages={chatState.messages} />
       </div>
