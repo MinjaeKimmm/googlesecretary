@@ -1,4 +1,6 @@
+import fal_client
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from src.models.user import User
 from src.services.database.elastic import return_drive, return_email, get_es_client
 from src.services.email.client import format_emails, create_prompt_email
@@ -10,7 +12,7 @@ from src.process.email.preprocess import embed_email
 
 router = APIRouter()
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat")
 async def chat(request: ChatRequest):
     """Process a chat message about calendar events."""
     try:
@@ -30,11 +32,23 @@ async def chat(request: ChatRequest):
         if retrieved_documents:
             formatted_emails = await format_emails(retrieved_documents)
             prompt = await create_prompt_email(formatted_emails, request.user_message)
-            response = await generate_response(prompt)
-        else:
-            response = "No emails found."
-            
-        return ChatResponse(answer=response)
+        
+        async def event_generator(prompt):
+            # Initiate the async stream call with the prompt argument.
+            stream_obj = fal_client.stream_async(
+                "fal-ai/any-llm",
+                arguments={
+                    "prompt": prompt,
+                    "model": "anthropic/claude-3.5-sonnet",
+                },
+            )
+            # Iterate over the stream and yield each event formatted as an SSE message.
+            async for event in stream_obj:
+                # SSE requires messages to be prefixed with "data:" and separated by a double newline.
+                yield f"data: {event}\n\n"
+
+        # Return a StreamingResponse with the event_generator and set the media type accordingly.
+        return StreamingResponse(event_generator(prompt), media_type="text/event-stream")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
