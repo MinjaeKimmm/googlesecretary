@@ -59,8 +59,10 @@ class SpecificTimeTool(CalendarBaseTool):
     args_schema: Type[SpecificTimeInput] = SpecificTimeInput
 
     async def _arun(self, year: int, month: int, day: int, hour: int, minute: int) -> str:
-        # Create time in local timezone (KST)
-        local_time = datetime(year, month, day, hour, minute, tzinfo=ZoneInfo(DEFAULT_TIMEZONE))
-        # Convert to UTC for API
-        utc_time = to_utc(local_time)
+        # Create naive datetime first
+        local_time = datetime(year, month, day, hour, minute)
+        # Attach KST timezone
+        local_time = local_time.replace(tzinfo=ZoneInfo(DEFAULT_TIMEZONE))
+        # Convert to UTC
+        utc_time = local_time.astimezone(ZoneInfo("UTC"))
         return utc_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")

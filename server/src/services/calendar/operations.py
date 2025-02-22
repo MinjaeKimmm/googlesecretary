@@ -34,17 +34,23 @@ async def create_event(
     end_datetime: str
 ) -> Dict[str, Any]:
     """Create a new calendar event."""
-    timezone = await get_calendar_timezone(user_email, calendar_id)
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    from src.utils.timezone import DEFAULT_TIMEZONE
+    
+    # Parse the input times (which should be in UTC)
+    start_dt = datetime.fromisoformat(start_datetime.replace('Z', '+00:00'))
+    end_dt = datetime.fromisoformat(end_datetime.replace('Z', '+00:00'))
     
     event_data = {
-        "summary": f"{event_name} (created by Assistant)",
+        "summary": event_name,
         "start": {
-            "dateTime": start_datetime,
-            "timeZone": timezone,
+            "dateTime": start_dt.isoformat(),
+            "timeZone": DEFAULT_TIMEZONE,  # Use KST for display
         },
         "end": {
-            "dateTime": end_datetime,
-            "timeZone": timezone,
+            "dateTime": end_dt.isoformat(),
+            "timeZone": DEFAULT_TIMEZONE,  # Use KST for display
         },
     }
     
