@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.models.user import User
-from src.services.database.elastic import return_drive, return_email
+from src.services.database.elastic import return_drive, return_email, get_es_client
 from src.services.email.client import format_emails, create_prompt_email
 from typing import Dict
 from src.models.email import ChatRequest, ChatResponse, SetupRequest
 from src.agents.llm_agent import generate_response
-from src.data.email.preprocess import embed_email
+from src.process.email.preprocess import embed_email
 
 
 router = APIRouter()
@@ -47,4 +47,12 @@ async def setup_email(request: SetupRequest):
         await embed_email(request.json_location, vector_store,request.root, request.user_email)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        
+
+@router.post("/remove_all")
+async def remove_all():
+    """Remove all emails."""
+    try:
+        (await get_es_client()).indices.delete(index="email", ignore=[400, 404])
+        (await get_es_client()).indices.create(index="email", ignore=400)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

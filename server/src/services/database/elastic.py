@@ -45,3 +45,6 @@ async def return_email():
     
 async def return_drive():
     return drive_vector_store
+
+async def get_es_client():
+    return es_client
