@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { ServiceType } from '@/types/services';
+import { ServiceType, UserData } from '@/types/services';
 import apiClient from '@/lib/api-client';
 
 export function useServiceStatus(service: ServiceType) {
+  type QueryResult = UserData;
   const { data: session } = useSession();
 
   return useQuery({

@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 import httpx
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from src.config.settings import get_settings
 from src.config.constants import GOOGLE_OAUTH_TOKEN_URL, GOOGLE_USERINFO_URL
+from src.models.user import User
+from src.services.database.mongodb import get_user_by_email
 
 settings = get_settings()
 
@@ -37,3 +41,31 @@ async def refresh_google_token(refresh_token: str) -> Optional[Dict[str, Any]]:
 def is_token_expired(expiry: datetime) -> bool:
     """Check if token is expired or about to expire in 5 minutes"""
     return datetime.utcnow() + timedelta(minutes=5) >= expiry
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """Get current user from token"""
+    try:
+        user_info = await verify_google_token(token)
+        if not user_info or "email" not in user_info:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        user = await get_user_by_email(user_info["email"])
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+            
+        return user
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )

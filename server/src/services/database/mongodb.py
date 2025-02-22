@@ -102,3 +102,33 @@ async def get_user_by_email(email: str):
         print(f"Final user object: {user}")
         return user
     return None
+
+async def get_service_status(email: str, service: str = None):
+    """Get service status for a user. If service is specified, return only that service's status."""
+    print(f"Getting service status for email: {email}, service: {service}")
+    db_instance = await get_db()
+    
+    try:
+        user = await db_instance.users.find_one({"email": email})
+        print(f"Found user: {user}")
+        
+        if not user:
+            print(f"No user found for email: {email}")
+            return None
+            
+        if "services" not in user:
+            print(f"No services found for user: {email}")
+            return None
+            
+        services = user["services"]
+        print(f"Found services: {services}")
+        
+        if service:
+            service_status = services.get(service)
+            print(f"Status for service {service}: {service_status}")
+            return service_status
+            
+        return services
+    except Exception as e:
+        print(f"Error getting service status: {str(e)}")
+        raise

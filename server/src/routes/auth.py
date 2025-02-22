@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from datetime import datetime, timedelta
 from src.models.user import User, UserInDB, ServiceSetup
 from src.services.database import get_db
-from src.utils.auth import verify_google_token, refresh_google_token
+from src.utils.auth import verify_google_token, refresh_google_token, get_current_user
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
+from src.services.database.mongodb import get_service_status
 import os
 
 router = APIRouter()
@@ -137,3 +138,29 @@ async def handle_token(
         access_token=token_request.token,
         user=UserInDB(**user_data)
     )
+
+@router.post("/check-service-status")
+async def check_service_status(
+    request: Request,
+    service: str = None,
+    current_user: User = Depends(get_current_user)
+):
+    print(f"\n=== Check service status endpoint called ===\nService: {service}\nUser: {current_user}")
+    try:
+        status = await get_service_status(current_user.email, service)
+        print(f"Service status: {status}")
+        if not status:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No service status found for user {current_user.email}"
+            )
+        return {
+            "email": current_user.email,
+            "services": status
+        }
+    except HTTPException as he:
+        print(f"HTTP Exception: {he}")
+        raise he
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
