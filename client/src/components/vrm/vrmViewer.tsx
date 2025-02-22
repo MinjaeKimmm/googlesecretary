@@ -13,7 +13,7 @@ export default function VrmViewer({selectedCharacter}: VrmViewerProps) {
     Shortcut: "/models/shortcut.vrm",
     Wolf: "/models/wolf.vrm",
     Teenager: "/models/teenager.vrm",
-    Tuxedo: "/models/tuxedo.vrm",
+    Tuxido: "/models/tuxido.vrm",
     Yukata: "/models/yukata.vrm",
   };
 

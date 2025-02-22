@@ -97,7 +97,7 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
       </div>
 
       <div className="h-1/2 overflow-y-auto">
-        <MessageList messages={chatState.messages} />
+        <MessageList messages={chatState.messages} selectedCharacter={selectedCharacter} />
       </div>
 
       <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">

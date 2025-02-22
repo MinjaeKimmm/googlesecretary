@@ -8,11 +8,21 @@ import { useSession } from 'next-auth/react';
 
 interface MessageListProps {
   messages: Message[];
+  selectedCharacter: string;
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, selectedCharacter }: MessageListProps) {
   const { data: session } = useSession();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  const assistantAvatars: Record<string, string> = {
+    Bunny: "/profile/bunny.png",
+    Shortcut: "/profile/shortcut.png",
+    Wolf: "/profile/wolf.png",
+    Teenager: "/profile/teenager.png",
+    Tuxido: "/profile/tuxido.png",
+    Yukata: "/profile/yukata.png",
+  };
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,8 +150,8 @@ export function MessageList({ messages }: MessageListProps) {
                 </div>
               </div>
               <img 
-                src="https://cdn.icon-icons.com/icons2/1371/PNG/512/robot02_90810.png" 
-                alt="" 
+                src={assistantAvatars[selectedCharacter] || "/avatars/bunny.png"} 
+                alt="assistant-avatar" 
                 className="w-6 h-6 rounded-full order-1"
               />
             </div>
