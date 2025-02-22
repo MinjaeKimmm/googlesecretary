@@ -9,6 +9,7 @@ import { DriveControls } from '@/components/services/drive/drive-controls';
 import { EmailControls } from '@/components/services/email/email-controls';
 import { ChatContainer } from '@/components/chat/chat-container';
 import LogoutDropdown from '@/components/logOutDropDown';
+import SignInButton from '@/components/auth/signin-button';
 
 export default function Home() {
   const { status, data: session } = useSession();
@@ -42,6 +43,7 @@ export default function Home() {
           {status === "authenticated" && session?.user && (
             <LogoutDropdown user={session.user} />
           )}
+          <SignInButton />
         </div>
       </header>
 
