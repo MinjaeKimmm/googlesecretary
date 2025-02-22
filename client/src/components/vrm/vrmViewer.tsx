@@ -63,7 +63,7 @@ export default function VrmViewer() {
   );
 
   return (
-    <div className={"absolute top-0 left-0 w-screen h-1/2 -z-10"}>
+    <div className={"w-full h-full -z-10"}>
       <canvas ref={canvasRef} className={"h-full w-full"}></canvas>
     </div>
   );

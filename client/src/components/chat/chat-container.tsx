@@ -60,14 +60,15 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
   };
 
   return (
-    <main className="flex-1 flex flex-col overflow-hidden container mx-auto px-4">
-      <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-80 bg-white">
-        <div className="h-1/2">
+    <div className="flex flex-col h-[600px] border border-gray-200 rounded-lg bg-white">
+        <div className="h-1/2 w-full">
           <VrmViewer/>
         </div>
-        <div className="flex-1 overflow-y-auto">
+
+        <div className="h-1/2 overflow-y-auto">
           <MessageList messages={chatState.messages} />
         </div>
+
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
           <MessageInput 
             service={service}
@@ -79,7 +80,6 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
             error={chatState.error}
           />
         </div>
-      </div>
-    </main>
+    </div>
   );
 }
