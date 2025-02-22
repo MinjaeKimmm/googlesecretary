@@ -42,8 +42,9 @@ def embed_drive(root, vector_store, user_id):
             vector_store.add_documents(documents=[document], ids=[uuid])
             
             
-async def embed_drive(root:str, vector_store:AsyncElasticsearchStore,  user_id:str):
+async def embed_drive(vector_store:AsyncElasticsearchStore,  user_id:str):
     try:
+        root = os.path.join(os.environ["ROOT_LOCATION"], "data", user_id, "drive")
         list_all_files = []
         for r, dirs, files in os.walk(root):
             for file in files:

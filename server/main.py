@@ -6,8 +6,13 @@ from src.services.database.mongodb import init_db
 from src.services.database.elastic import init_elastic
 from src.services.database.elastic import return_drive
 
-app = FastAPI(title="Google Workspace Assistant API")
+import os
 
+
+
+app = FastAPI(title="Google Workspace Assistant API")
+# get location of current folder
+os.environ["ROOT_LOCATION"] = os.path.dirname(os.path.abspath(__file__))
 # Load settings
 settings = get_settings()
 

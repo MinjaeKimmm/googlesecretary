@@ -44,7 +44,7 @@ async def setup_email(request: SetupRequest):
     """embed emails."""
     try:
         vector_store = await return_email()
-        await embed_email(request.json_location, vector_store,request.root, request.user_email)
+        await embed_email(vector_store,request.user_email)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

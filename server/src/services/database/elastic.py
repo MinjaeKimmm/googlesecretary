@@ -37,7 +37,8 @@ async def init_elastic():
         index_name="drive",
         embedding=openai_embeddings
     )
-
+    es_client.indices.create(index="drive", ignore=400)
+    es_client.indices.create(index="email", ignore=400)
     
     
 async def return_email():

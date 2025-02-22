@@ -8,8 +8,11 @@ import os
 from markitdown import MarkItDown
 from langchain_elasticsearch import AsyncElasticsearchStore
 
-async def embed_email(json_loc:str, vector_store:AsyncElasticsearchStore, root_attachment_file_loc:str, user_id:str):
+async def embed_email(vector_store:AsyncElasticsearchStore,  user_id:str):
     try:
+        root_attachment_file_loc = os.path.join(os.environ["ROOT_LOCATION"], "data", user_id)
+        json_loc = os.path.join(os.environ["ROOT_LOCATION"], "data", user_id, "emails", "email_conversations.json")
+        
         md = MarkItDown(enable_plugins=False)
         with open(json_loc, "r", encoding='UTF8') as f:
             data = json.load(f)
@@ -68,6 +71,7 @@ async def embed_email(json_loc:str, vector_store:AsyncElasticsearchStore, root_a
                                 page_content=res.text_content, metadata=metadata
                             )
                             uuid = str(uuid4())
+                            print
                             await vector_store.aadd_documents(documents=[document], ids=[uuid])
 
                 body_content = message.get("Body")

@@ -8,6 +8,4 @@ class ChatResponse(BaseModel):
     answer: str
 
 class SetupRequest(BaseModel):
-    root : str
     user_email: str
-    json_location: str
