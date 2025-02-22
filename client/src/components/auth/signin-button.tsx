@@ -10,6 +10,7 @@ export default function SignInButton() {
             {status === "authenticated" ? (
                 <button onClick={() => signOut()} className="text-lg flex items-center bg-white text-gray-900 p-2 rounded-md">
                     <img src={session?.user?.image || "google.svg"} alt="profile" className="w-6 h-6 mr-2 rounded-full" />
+                    {session?.user?.name}
                     Logout
                 </button>
             ) : (
