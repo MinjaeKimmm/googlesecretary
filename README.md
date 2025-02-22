@@ -1,6 +1,7 @@
 # ARIA: Adaptive RAG-Based Interactive Avatar Assistant
 
 ![ARIA](https://github.com/user-attachments/assets/090a0da1-9fe9-4a3c-a869-5a2eeddcc098)
+[Our Presentation](https://github.com/MinjaeKimmm/googlesecretary/blob/main/ARIA_PPT.pdf)
 
 ARIA is an AI-powered interactive avatar assistant that leverages **Retrieval-Augmented Generation (RAG)** to provide human-like responses and dynamic interactions. Designed to be a personal assistant, ARIA seamlessly integrates knowledge retrieval, reasoning, and real-time engagement.
 
