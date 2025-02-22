@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     openai_api_key: str = os.getenv('OPENAI_API_KEY')
     openai_model: str = os.getenv('OPENAI_MODEL')
     
+    # elastic settings
+    elastic_url: str = os.getenv('ELASTIC_URI')
+    elastic_username: str = os.getenv('ELASTIC_USERNAME')
+    elastic_password: str = os.getenv('ELASTIC_PASSWORD')
+    
+    
+    
     # Application settings
     frontend_url: str = os.getenv('NEXTAUTH_URL', 'http://localhost:3000')
 

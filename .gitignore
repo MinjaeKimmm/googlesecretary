@@ -16,3 +16,17 @@ node_modules/
 data/
 
 *.zip
+
+# Python environment
+eleven
+
+# Cache
+__pycache__/
+
+# Environment
+.env
+
+#Dependencies
+node_modules/
+
+server/src/markitdown

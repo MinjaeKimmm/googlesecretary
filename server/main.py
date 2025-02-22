@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config.settings import get_settings
-from src.routes import auth, calendar #, email, drive
+from src.routes import auth, calendar, email, drive
 from src.services.database.mongodb import init_db
+from src.services.database.elastic import init_elastic
+from src.services.database.elastic import return_drive
 
 app = FastAPI(title="Google Workspace Assistant API")
 
@@ -20,15 +22,20 @@ app.add_middleware(
 
 # Initialize database
 @app.on_event("startup")
-async def startup_db_client():
+async def startup_client():
     await init_db()
+    await init_elastic()
+
+@app.get("/", tags=["root"])
+def welcome():
+    return {"message": "Welcome to Google Workspace Assistant API!"}
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(calendar.router, prefix="/api/calendar", tags=["calendar"])
-#app.include_router(email.router, prefix="/api/email", tags=["email"])
-#app.include_router(drive.router, prefix="/api/drive", tags=["drive"])
+app.include_router(email.router, prefix="/api/email", tags=["email"])
+app.include_router(drive.router, prefix="/api/drive", tags=["drive"])
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=False)
