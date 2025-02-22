@@ -29,4 +29,5 @@ __pycache__/
 #Dependencies
 node_modules/
 
-server/src/markitdown
+
+markitdown/
