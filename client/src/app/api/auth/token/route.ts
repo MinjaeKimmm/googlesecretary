@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "../[...nextauth]/route";
 
 const BASE_URL = process.env.FASTAPI_URL;
 
@@ -21,41 +21,20 @@ export async function POST(request: Request) {
       });
     }
 
-    const body = await request.json();
-    console.log('Request body received:', body);
-    
-    // Handle both formats (message or user_message)
-    const user_message = body.user_message || body.message;
-    const calendar_id = body.calendar_id;
-    
-    if (!user_message) {
-      return new Response(JSON.stringify({ error: "Message is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    
-    const payload = {
-      user_email: session.user.email,
-      user_message,
-      calendar_id,
-    };
-    console.log('Sending payload to FastAPI:', payload);
-
-    const response = await fetch(`${BASE_URL}/api/calendar/chat`, {
+    const response = await fetch(`${BASE_URL}/api/auth/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_email: session.user.email,
-        user_message,
-        calendar_id,
+        token: session.accessToken,
+        refresh_token: session.refreshToken || "",
+        test_mode: false
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to send chat message. Status: ${response.status}`);
+      throw new Error(`Failed to exchange token. Status: ${response.status}`);
     }
 
     const data = await response.json();
@@ -63,6 +42,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    console.error('Token exchange error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

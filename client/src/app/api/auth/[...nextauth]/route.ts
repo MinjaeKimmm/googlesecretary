@@ -21,14 +21,14 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
+          scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
           prompt: 'consent',
           access_type: 'offline',
           response_type: 'code'
         }
       },
       httpOptions: {
-        timeout: 10000 // 10 seconds
+        timeout: 30000 // 30 seconds
       }
     })
   ],
