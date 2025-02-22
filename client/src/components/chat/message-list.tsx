@@ -20,7 +20,7 @@ export function MessageList({ messages, selectedCharacter }: MessageListProps) {
     Shortcut: "/profile/shortcut.png",
     Wolf: "/profile/wolf.png",
     Teenager: "/profile/teenager.png",
-    Tuxido: "/profile/tuxido.png",
+    Tuxedo: "/profile/tuxedo.png",
     Yukata: "/profile/yukata.png",
   };
 
