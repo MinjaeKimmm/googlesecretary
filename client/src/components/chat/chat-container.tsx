@@ -63,7 +63,7 @@ export function ChatContainer({ service, language }: ChatContainerProps) {
     <main className="flex-1 flex flex-col overflow-hidden container mx-auto px-4">
       <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-80 bg-white">
         <div className="h-1/2">
-          <VrmViewer selectedCharacter={selectedCharacter}/>
+          <VrmViewer/>
         </div>
         <div className="flex-1 overflow-y-auto">
           <MessageList messages={chatState.messages} />

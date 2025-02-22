@@ -29,22 +29,21 @@ export default function Home() {
     <main className="flex min-h-screen flex-col p-8">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Google Workspace Assistant</h1>
-
-        <div className="flex space-x-4">
-          {/* ✅ 언어 변경 버튼 */}
-          <button
+          {status === "authenticated" && session?.user && (
+            <div className ="flex space-x-4">
+            <button
             onClick={toggleLanguage}
             className={`px-4 py-2 rounded-lg bg-gray-200`}
           >
             {language === "ko-KR" ? "KR" : "EN"}
-          </button>
-
-          {/* ✅ 로그인 사용자에게 LogoutDropdown 표시 */}
-          {status === "authenticated" && session?.user && (
+            </button>
             <LogoutDropdown user={session.user} />
+            </div>
           )}
-          <SignInButton />
-        </div>
+          {status == "unauthenticated" && 
+            <SignInButton />
+          }
+
       </header>
 
       {status === 'authenticated' && (
