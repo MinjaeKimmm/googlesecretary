@@ -1,6 +1,7 @@
 from typing import List, Dict
 import datetime
 from typing import List, Dict
+from zoneinfo import ZoneInfo
 
 from langchain.agents import AgentExecutor
 from langchain_openai import ChatOpenAI
@@ -19,6 +20,7 @@ from src.tools.calendar import (
     CreateCalendarEventTool,
     DeleteCalendarEventTool
 )
+from src.utils.timezone import to_utc, to_local, format_local_time, DEFAULT_TIMEZONE
 
 class CalendarAgent:
     def __init__(self):
@@ -44,7 +46,9 @@ class CalendarAgent:
                 1. NEVER print event ids to the user
                 2. When using get_calendar_events, always set include_event_ids=false
                 3. When summarizing events, focus on event names, times, and descriptions
-                4. Be concise but informative"""
+                4. Be concise but informative
+                5. All times are in Asia/Seoul timezone (KST)
+                6. When creating events, specify times in KST (UTC+9)"""
                 
             ),
             ("user", "{input}"),

@@ -21,6 +21,21 @@ async def close_db():
     if client is not None:
         client.close()
 
+async def update_user_tokens(email: str, access_token: str, refresh_token: str = None, token_expiry: datetime = None):
+    """Update user's OAuth tokens in database."""
+    db_instance = await get_db()
+    update_data = {"access_token": access_token}
+    
+    if refresh_token:
+        update_data["refresh_token"] = refresh_token
+    if token_expiry:
+        update_data["token_expiry"] = token_expiry
+    
+    await db_instance.users.update_one(
+        {"email": email},
+        {"$set": update_data}
+    )
+
 async def get_user_by_email(email: str):
     """Get user from database by email."""
     print(f"Getting user by email: {email}")

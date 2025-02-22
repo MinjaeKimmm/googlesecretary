@@ -19,7 +19,7 @@ const getInitialMessages = (service: ServiceType): Message[] => ({
 
 const initialState: ServiceState = {
   calendar: {
-    selectedCalendarId: 'primary',
+    selectedCalendarId: '',  // No default calendar, will be set after fetching
     chat: { messages: getInitialMessages('calendar'), isLoading: false, error: null }
   },
   drive: {

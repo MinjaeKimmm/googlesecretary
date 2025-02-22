@@ -5,6 +5,8 @@ from datetime import datetime
 # Calendar List Models
 class CalendarListRequest(BaseModel):
     email: str
+    access_token: str
+    refresh_token: Optional[str] = None
 
 class CalendarList(BaseModel):
     email: str
@@ -24,6 +26,8 @@ class ChatRequest(BaseModel):
     user_email: str
     user_message: str
     calendar_id: str
+    access_token: str
+    refresh_token: Optional[str] = None
 
 class ChatResponse(BaseModel):
     answer: str

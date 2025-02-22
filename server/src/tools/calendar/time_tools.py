@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from zoneinfo import ZoneInfo
 
 from .base import CalendarBaseTool
+from src.utils.timezone import to_utc, to_local, DEFAULT_TIMEZONE
 
 class TimeDeltaInput(BaseModel):
     """Input schema for TimeDeltaTool."""
@@ -19,13 +20,17 @@ class TimeDeltaTool(CalendarBaseTool):
 
     async def _arun(self, delta_days: int = 0, delta_hours: int = 0,
              delta_minutes: int = 0, delta_seconds: int = 0) -> str:
-        future_time = datetime.utcnow() + timedelta(
+        # Start with current time in local timezone
+        current_local = datetime.now(ZoneInfo(DEFAULT_TIMEZONE))
+        future_local = current_local + timedelta(
             days=delta_days or 0,
             hours=delta_hours or 0,
             minutes=delta_minutes or 0,
             seconds=delta_seconds or 0
         )
-        return future_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        # Convert to UTC for API
+        future_utc = to_utc(future_local)
+        return future_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 class CurrentTimeInput(BaseModel):
     """Empty input schema for CurrentTimeTool."""
@@ -37,7 +42,8 @@ class CurrentTimeTool(CalendarBaseTool):
     args_schema: Type[CurrentTimeInput] = CurrentTimeInput
 
     async def _arun(self) -> str:
-        return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        current_utc = datetime.now(ZoneInfo("UTC"))
+        return current_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 class SpecificTimeInput(BaseModel):
     """Input schema for SpecificTimeTool."""
@@ -53,9 +59,8 @@ class SpecificTimeTool(CalendarBaseTool):
     args_schema: Type[SpecificTimeInput] = SpecificTimeInput
 
     async def _arun(self, year: int, month: int, day: int, hour: int, minute: int) -> str:
-        # Create time in Asia/Seoul timezone
-        local_tz = ZoneInfo("Asia/Seoul")
-        specific_time = datetime(year, month, day, hour, minute, tzinfo=local_tz)
-        # Convert to UTC
-        utc_time = specific_time.astimezone(ZoneInfo("UTC"))
+        # Create time in local timezone (KST)
+        local_time = datetime(year, month, day, hour, minute, tzinfo=ZoneInfo(DEFAULT_TIMEZONE))
+        # Convert to UTC for API
+        utc_time = to_utc(local_time)
         return utc_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")

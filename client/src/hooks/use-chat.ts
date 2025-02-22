@@ -25,6 +25,8 @@ export function useChat(service: ServiceType) {
       
       if (service === 'calendar') {
         const calendarId = serviceStates.calendar.selectedCalendarId;
+        console.log('Calendar state:', serviceStates.calendar);
+        console.log('Selected calendar ID:', calendarId);
         if (!calendarId) {
           throw new Error('Please select a calendar first');
         }
@@ -32,6 +34,7 @@ export function useChat(service: ServiceType) {
           user_message: content,
           calendar_id: calendarId
         };
+        console.log('Final payload:', payload);
       }
 
       console.log('Sending chat request with payload:', payload);
@@ -47,10 +50,12 @@ export function useChat(service: ServiceType) {
       );
 
       // Add assistant response
+      const responseContent = response.data.answer || response.data.message; // Handle both formats for compatibility
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response.data.message
+        content: responseContent
       };
+      console.log('Received assistant response:', responseContent);
       addMessage(service, assistantMessage);
     } catch (error) {
       setError(service, 'Failed to send message');

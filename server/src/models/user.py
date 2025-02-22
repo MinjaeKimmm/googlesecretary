@@ -13,7 +13,7 @@ class User(BaseModel):
     picture: Optional[str] = None
     access_token: str
     refresh_token: Optional[str] = None
-    token_expiry: datetime
+    token_expiry: Optional[datetime] = None
     services: dict[str, ServiceSetup] = {
         "calendar": ServiceSetup(is_setup=False),
         "email": ServiceSetup(is_setup=False),
@@ -21,6 +21,9 @@ class User(BaseModel):
     }
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 class UserInDB(User):
     id: str
