@@ -26,7 +26,6 @@ colorama==0.4.6
 compressed-tensors==0.9.1
 crashtest==0.4.1
 cryptography==44.0.1
-cupy-cuda12x==13.3.0
 dataclasses-json==0.6.7
 defusedxml==0.7.1
 depyf==0.18.0
@@ -96,7 +95,6 @@ lxml==5.3.1
 mammoth==1.9.0
 markdown-it-py==3.0.0
 markdownify==0.14.1
--e git+https://github.com/microsoft/markitdown.git@dbdf2c0c1031dadc257a20f03cf9091907cb5972#egg=markitdown&subdirectory=packages\markitdown
 MarkupSafe==3.0.2
 marshmallow==3.26.1
 mdurl==0.1.2
@@ -167,8 +165,6 @@ python-jose==3.4.0
 python-multipart==0.0.20
 python-pptx==1.0.2
 pytz==2025.1
-pywin32==308
-pywin32-ctypes==0.2.3
 PyYAML==6.0.2
 pyzmq==26.2.1
 RapidFuzz==3.10.1

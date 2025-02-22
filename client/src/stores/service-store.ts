@@ -24,6 +24,7 @@ const initialState: ServiceState = {
   },
   drive: {
     selectedFolderId: 'root',
+    selectedFolderPath: 'My Drive',
     chat: { messages: getInitialMessages('drive'), isLoading: false, error: null }
   },
   email: {
