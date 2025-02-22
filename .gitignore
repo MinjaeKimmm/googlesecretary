@@ -1,0 +1,18 @@
+# Python environment
+eleven
+
+# Cache
+__pycache__/
+
+# Environment
+.env
+
+#Dependencies
+node_modules/
+
+
+data/
+
+*.zip
+
+.DS_STORE

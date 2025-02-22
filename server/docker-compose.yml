@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}  
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongodata:/data/db
+    command: mongod --bind_ip_all
+
+volumes:
+  mongodata:
