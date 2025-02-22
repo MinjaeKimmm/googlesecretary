@@ -61,7 +61,8 @@ async def handle_token(
         scope_version="v1"
     )
 
-    # Create or update user
+    # Create or update user with default service setup
+    current_time = datetime.utcnow()
     user_data = {
         "email": user_info["email"],
         "name": user_info.get("name"),
@@ -69,22 +70,23 @@ async def handle_token(
         "access_token": token_request.token,
         "refresh_token": token_request.refresh_token,
         "token_expiry": token_expiry,
-        "updated_at": datetime.utcnow(),
+        "created_at": current_time,
+        "updated_at": current_time,
         "services": {
             "calendar": {
-                "is_setup": calendar_service.is_setup,
-                "last_setup_time": calendar_service.last_setup_time,
-                "scope_version": calendar_service.scope_version
+                "is_setup": True,  # Calendar is set up by default since we have tokens
+                "last_setup_time": current_time,
+                "scope_version": "v1"
             },
             "email": {
-                "is_setup": email_service.is_setup,
-                "last_setup_time": email_service.last_setup_time,
-                "scope_version": email_service.scope_version
+                "is_setup": False,
+                "last_setup_time": None,
+                "scope_version": "v1"
             },
             "drive": {
-                "is_setup": drive_service.is_setup,
-                "last_setup_time": drive_service.last_setup_time,
-                "scope_version": drive_service.scope_version
+                "is_setup": False,
+                "last_setup_time": None,
+                "scope_version": "v1"
             }
         }
     }
@@ -95,7 +97,7 @@ async def handle_token(
     existing_user = await db.users.find_one({"email": user_info["email"]})
     if existing_user:
         print(f"Found existing user: {existing_user}")
-        # Update existing user - use dot notation for nested fields
+        # Update existing user while preserving service setup state
         update_data = {
             "email": user_data["email"],
             "name": user_data["name"],
@@ -104,16 +106,17 @@ async def handle_token(
             "refresh_token": user_data["refresh_token"],
             "token_expiry": user_data["token_expiry"],
             "updated_at": user_data["updated_at"],
-            "services.calendar.is_setup": user_data["services"]["calendar"]["is_setup"],
-            "services.calendar.last_setup_time": user_data["services"]["calendar"]["last_setup_time"],
-            "services.calendar.scope_version": user_data["services"]["calendar"]["scope_version"],
-            "services.email.is_setup": user_data["services"]["email"]["is_setup"],
-            "services.email.last_setup_time": user_data["services"]["email"]["last_setup_time"],
-            "services.email.scope_version": user_data["services"]["email"]["scope_version"],
-            "services.drive.is_setup": user_data["services"]["drive"]["is_setup"],
-            "services.drive.last_setup_time": user_data["services"]["drive"]["last_setup_time"],
-            "services.drive.scope_version": user_data["services"]["drive"]["scope_version"]
         }
+        
+        # Only update service setup if not already set
+        for service_name in ["calendar", "email", "drive"]:
+            service_path = f"services.{service_name}"
+            if service_path not in existing_user or not existing_user[service_path].get("is_setup"):
+                update_data[f"{service_path}.is_setup"] = user_data["services"][service_name]["is_setup"]
+                update_data[f"{service_path}.last_setup_time"] = user_data["services"][service_name]["last_setup_time"]
+                update_data[f"{service_path}.scope_version"] = user_data["services"][service_name]["scope_version"]
+        
+        # Update the user
         await db.users.update_one(
             {"email": user_info["email"]},
             {"$set": update_data}
@@ -121,9 +124,10 @@ async def handle_token(
         user_data["id"] = str(existing_user["_id"])
     else:
         print("Creating new user")
-        # Insert new user
+        # Insert new user with complete data
         result = await db.users.insert_one(user_data)
         user_data["id"] = str(result.inserted_id)
+        print(f"Created new user with ID: {user_data['id']}")
     
     # Verify the saved user
     saved_user = await db.users.find_one({"email": user_info["email"]})

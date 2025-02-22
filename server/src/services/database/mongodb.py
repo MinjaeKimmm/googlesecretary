@@ -22,19 +22,57 @@ async def close_db():
         client.close()
 
 async def update_user_tokens(email: str, access_token: str, refresh_token: str = None, token_expiry: datetime = None):
-    """Update user's OAuth tokens in database."""
+    """Update user's OAuth tokens in database. Creates user if not exists."""
     db_instance = await get_db()
-    update_data = {"access_token": access_token}
+    current_time = datetime.utcnow()
     
-    if refresh_token:
-        update_data["refresh_token"] = refresh_token
-    if token_expiry:
-        update_data["token_expiry"] = token_expiry
+    # First try to find the user
+    existing_user = await db_instance.users.find_one({"email": email})
     
-    await db_instance.users.update_one(
-        {"email": email},
-        {"$set": update_data}
-    )
+    if existing_user:
+        # Update existing user's tokens
+        update_data = {
+            "access_token": access_token,
+            "updated_at": current_time
+        }
+        if refresh_token:
+            update_data["refresh_token"] = refresh_token
+        if token_expiry:
+            update_data["token_expiry"] = token_expiry
+            
+        await db_instance.users.update_one(
+            {"email": email},
+            {"$set": update_data}
+        )
+    else:
+        # Create new user with default setup
+        new_user = {
+            "email": email,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_expiry": token_expiry,
+            "created_at": current_time,
+            "updated_at": current_time,
+            "services": {
+                "calendar": {
+                    "is_setup": True,  # Calendar is set up by default since we have tokens
+                    "last_setup_time": current_time,
+                    "scope_version": "v1"
+                },
+                "email": {
+                    "is_setup": False,
+                    "last_setup_time": None,
+                    "scope_version": "v1"
+                },
+                "drive": {
+                    "is_setup": False,
+                    "last_setup_time": None,
+                    "scope_version": "v1"
+                }
+            }
+        }
+        await db_instance.users.insert_one(new_user)
+        print(f"Created new user in database: {email}")
 
 async def get_user_by_email(email: str):
     """Get user from database by email."""

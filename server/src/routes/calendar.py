@@ -15,7 +15,7 @@ async def get_calendar_service(email: str, access_token: str, refresh_token: str
     """Get calendar service instance for a user."""
     print(f"Getting calendar service for email: {email}")
     try:
-        # First, update the tokens in the database
+        # First, update the tokens in the database - this will create the user if they don't exist
         from src.services.database.mongodb import update_user_tokens
         await update_user_tokens(email, access_token, refresh_token)
         print(f"Updated database with new tokens for user: {email}")
@@ -23,27 +23,17 @@ async def get_calendar_service(email: str, access_token: str, refresh_token: str
         # Get the user with updated tokens
         existing_user = await get_user_by_email(email)
         if not existing_user:
-            # If user doesn't exist, create new user
-            from src.models.user import User, ServiceSetup
-            user = User(
-                email=email,
-                access_token=access_token,
-                refresh_token=refresh_token,
-                services={"calendar": ServiceSetup(is_setup=True)}
-            )
-        else:
-            # Use existing user but with updated tokens
-            existing_user.access_token = access_token
-            if refresh_token:
-                existing_user.refresh_token = refresh_token
-            if "calendar" not in existing_user.services:
-                existing_user.services["calendar"] = ServiceSetup(is_setup=True)
-            else:
-                existing_user.services["calendar"].is_setup = True
-            user = existing_user
+            print(f"Error: User {email} not found after update_user_tokens")
+            raise HTTPException(status_code=500, detail="Failed to retrieve user after token update")
         
-        print(f"User configured: {user}")
-        return CalendarService(user)
+        # Ensure calendar service is marked as set up
+        if "calendar" not in existing_user.services:
+            existing_user.services["calendar"] = ServiceSetup(is_setup=True)
+        else:
+            existing_user.services["calendar"].is_setup = True
+        
+        print(f"User configured: {existing_user}")
+        return CalendarService(existing_user)
     except Exception as e:
         print(f"Error in get_calendar_service: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to initialize calendar service: {str(e)}")
