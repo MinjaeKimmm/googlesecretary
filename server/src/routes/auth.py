@@ -143,24 +143,61 @@ async def handle_token(
 async def check_service_status(
     request: Request,
     service: str = None,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     print(f"\n=== Check service status endpoint called ===\nService: {service}\nUser: {current_user}")
     try:
-        status = await get_service_status(current_user.email, service)
-        print(f"Service status: {status}")
-        if not status:
+        # Verify user exists in database
+        user_doc = await db.users.find_one({"email": current_user.email})
+        if not user_doc:
+            print(f"User {current_user.email} not found in database")
             raise HTTPException(
                 status_code=404,
-                detail=f"No service status found for user {current_user.email}"
+                detail=f"User {current_user.email} not found"
             )
+
+        # Get service status
+        status = await get_service_status(current_user.email, service)
+        print(f"Service status: {status}")
+        
+        # If no status found, return default status
+        if not status:
+            print(f"No service status found for {current_user.email}, returning default")
+            status = {
+                "calendar": {
+                    "is_setup": True,
+                    "last_setup_time": datetime.utcnow(),
+                    "scope_version": "v1"
+                },
+                "email": {
+                    "is_setup": False,
+                    "last_setup_time": None,
+                    "scope_version": "v1"
+                },
+                "drive": {
+                    "is_setup": False,
+                    "last_setup_time": None,
+                    "scope_version": "v1"
+                }
+            }
+            
+            # Update database with default status
+            await db.users.update_one(
+                {"email": current_user.email},
+                {"$set": {"services": status}}
+            )
+
         return {
             "email": current_user.email,
             "services": status
         }
     except HTTPException as he:
-        print(f"HTTP Exception: {he}")
+        print(f"HTTP Exception in check_service_status: {he}")
         raise he
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Unexpected error in check_service_status: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get service status: {str(e)}"
+        )

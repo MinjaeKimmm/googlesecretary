@@ -1,13 +1,18 @@
 import fal_client
 from fastapi import APIRouter, Depends, HTTPException
-from src.models.user import User
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from pydantic import BaseModel
+from src.models.drive import ChatRequest, ChatResponse, GoogleCredential
 from src.services.database.elastic import return_drive, get_es_client
-from src.services.drive.client import format_drive, create_prompt_drive
-from typing import Dict
-from src.models.drive import ChatRequest, ChatResponse, SetupRequest
+from src.services.database.mongodb import get_db
+from src.services.drive.client import format_drive, create_prompt_drive, get_drive_service
+from src.services.drive.storage import DriveStorage
+from src.services.drive.parser import parse_folder_contents, format_folder_structure
 from src.agents.llm_agent import generate_response
 from src.process.drive.preprocess import embed_drive
 from fastapi.responses import StreamingResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -68,13 +73,88 @@ async def chat(request: ChatRequest):
     return StreamingResponse(event_generator(prompt), media_type="text/event-stream")
 
 
+class DriveSetupRequest(BaseModel):
+    credential: GoogleCredential
+    user_email: str
+    folderId: str
+
 @router.post("/setup")
-async def setup_drive(request: SetupRequest):
-    """embed drive files."""
+async def setup_drive(
+    request: DriveSetupRequest,
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Setup drive service for a user."""
     try:
-        vector_store = await return_drive()
-        await embed_drive(vector_store, request.user_email)
+        print(f"Starting Drive setup for user: {request.user_email}")
+        
+        # Initialize Drive service
+        print("Initializing Drive service")
+        service = get_drive_service(request.credential.token)
+        storage = DriveStorage(request.user_email)
+        
+        # Check if folder exists and needs update
+        print("Checking folder status")
+        folder_contents = parse_folder_contents(service, request.folderId, depth=2)
+        print(f"Found {len(folder_contents)} items in folder")
+        
+        folder_data = {
+            'id': request.folderId,
+            'name': request.folderId,
+            'contents': folder_contents
+        }
+        
+        if await storage.should_update(request.folderId):
+            print("Updating existing folder backup")
+            await storage.update_folder(
+                service,
+                folder_id=request.folderId,
+                topic=request.folderId,
+                metadata=folder_data,
+                content=format_folder_structure(folder_contents)
+            )
+            print("Folder update completed")
+        else:
+            print("Creating new folder backup")
+            await storage.backup_folder(
+                folder_id=request.folderId,
+                topic=request.folderId,
+                metadata=folder_data,
+                content=format_folder_structure(folder_contents)
+            )
+            print("Folder backup completed")
+
+        # Embed in vectorstore
+        """
+        try:
+            print("Starting vector store embedding")
+            vector_store = await return_drive()
+            await embed_drive(vector_store, request.user_email)
+            print("Vector store embedding completed")
+        except Exception as e:
+            print(f"Vector store operation failed: {str(e)}")
+            raise
+        """
+
+        # Update database
+        """
+        print("Updating user service status in database")
+        await db.users.update_one(
+            {"email": request.user_email},
+            {
+                "$set": {
+                    "services.drive.is_setup": True,
+                    "services.drive.last_setup_time": datetime.utcnow(),
+                    "services.drive.scope_version": "v1",
+                    "google_credentials": request.credential.dict()
+                }
+            }
+        )
+        print("Database update completed")
+        """
+        print(f"Drive setup completed successfully for user: {request.user_email}")
+        return {"status": "success", "path": str(storage.drive_path)}
     except Exception as e:
+        print(f"Drive setup failed for user {request.user_email}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

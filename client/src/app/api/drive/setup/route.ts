@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
 
     const response = await apiClient.post('/api/drive/setup', {
       credential: body.credential,
-      folderId: body.folderId
+      folderId: body.folderId,
+      user_email: session.user?.email
     }, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`

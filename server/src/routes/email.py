@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from src.models.user import User
 from src.services.database.elastic import return_drive, return_email, get_es_client
-from src.services.email.client import format_emails, create_prompt_email
-from typing import Dict
-from src.models.email import ChatRequest, ChatResponse, SetupRequest
+from src.services.database.mongodb import get_db
+from src.services.email.client import format_emails, create_prompt_email, get_gmail_service
+from src.services.email.storage import EmailStorage
 from src.agents.llm_agent import generate_response
 from src.process.email.preprocess import embed_email
 
@@ -53,12 +53,59 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class EmailSetupRequest(BaseModel):
+    credential: GoogleCredential
+    user_email: str
+
 @router.post("/setup")
-async def setup_email(request: SetupRequest):
-    """embed emails."""
+async def setup_email(
+    request: EmailSetupRequest,
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Setup email service for a user."""
     try:
-        vector_store = await return_email()
-        await embed_email(vector_store,request.user_email)
+        print(f"Starting Email setup for user: {request.user_email}")
+        service = get_gmail_service(request.credential.token)
+        storage = EmailStorage(request.user_email)
+
+        print("Starting email backup/update")
+        if await storage.should_update():
+            backup_result = await storage.update_emails(service)
+        else:
+            backup_result = await storage.backup_emails(service)
+        print("Email backup/update completed")
+
+        # Embed in vectorstore
+        """
+        try:
+            print("Starting vector store embedding")
+            vector_store = await return_email()
+            await embed_email(vector_store, request.user_email)
+            print("Vector store embedding completed")
+        except Exception as e:
+            print(f"Vector store operation failed: {str(e)}")
+            raise
+        """
+
+        # Update database
+        """
+        print("Updating user service status in database")
+        await db.users.update_one(
+            {"email": request.user_email},
+            {
+                "$set": {
+                    "services.email.is_setup": True,
+                    "services.email.last_setup_time": datetime.utcnow(),
+                    "services.email.scope_version": "v1",
+                    "google_credentials": request.credential.dict()
+                }
+            }
+        )
+        print("Database update completed")
+        """
+        
+        print(f"Email setup completed successfully for user: {request.user_email}")
+        return {"status": "success", "path": str(storage.emails_dir)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const response = await apiClient.post('/api/email/setup', {
-      credential: body.credential
+      credential: body.credential,
+      user_email: session.user?.email
     }, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`

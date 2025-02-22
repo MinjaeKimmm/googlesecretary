@@ -1,7 +1,26 @@
 from typing import List
 from langchain_core.documents import Document
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 import json
 import os
+
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.metadata'
+]
+
+def get_gmail_service(token: str):
+    """Create and return a Gmail service instance."""
+    try:
+        credentials = Credentials(
+            token=token,
+            scopes=SCOPES
+        )
+        return build('gmail', 'v1', credentials=credentials)
+    except Exception as e:
+        print(f"Error creating Gmail service: {str(e)}")
+        raise
 
 async def create_prompt_email(emails_data: str, query: str) -> str:
     """
