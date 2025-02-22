@@ -18,7 +18,7 @@ async def init_elastic():
         [settings.elastic_url],
         basic_auth=(settings.elastic_username, settings.elastic_password),
         verify_certs=False,
-        request_timeout=30,
+        request_timeout=10,
         retry_on_timeout=True
     )
         

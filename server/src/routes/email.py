@@ -17,7 +17,7 @@ async def chat(request: ChatRequest):
         vector_store = await return_email()
         # TODO: Implement a search query to retrieve relevant emails
         search_kwargs = {
-            "k": 3,
+            "k": 10,
             "filter": {"term": {"metadata.user_id.keyword": request.user_email}},
         }
 
@@ -52,7 +52,24 @@ async def setup_email(request: SetupRequest):
 async def remove_all():
     """Remove all emails."""
     try:
-        (await get_es_client()).indices.delete(index="email", ignore=[400, 404])
-        (await get_es_client()).indices.create(index="email", ignore=400)
+        es_client = await get_es_client()
+        # Delete the "drive" index; ignore errors if it doesn't exist.
+        await es_client.indices.delete(index="email", ignore=[400, 404])
+        # Re-create the "drive" index.
+        await es_client.indices.create(index="email", ignore=400)
+        return {"detail": "All email files have been removed."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/get_all")
+async def get_all():
+    """Get all emails."""
+    try:
+        res = await ((await get_es_client()).search(
+            index="email", body={"query": {"match_all": {}}}
+        ))
+        # print results one by one
+        for hit in res["hits"]["hits"]:
+            print(hit["_source"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

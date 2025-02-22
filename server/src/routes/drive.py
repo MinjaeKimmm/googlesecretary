@@ -16,9 +16,10 @@ async def chat(request: ChatRequest):
 
     vector_store = await return_drive()
     # do not use first top directory of request.directory
-    request.directory = request.directory.split("/")[1]
+    request.directory = "/".join(request.directory.split("/")[1:])
+    print(request.directory)
     search_kwargs = {
-        "k": 3,
+        "k": 10,
         "filter": {
             "bool": {
                 "must": [
@@ -68,7 +69,25 @@ async def setup_drive(request: SetupRequest):
 async def remove_all():
     """Remove all emails."""
     try:
-        (await get_es_client()).indices.delete(index="drive", ignore=[400, 404])
-        (await get_es_client()).indices.create(index="drive", ignore=400)
+        es_client = await get_es_client()
+        # Delete the "drive" index; ignore errors if it doesn't exist.
+        await es_client.indices.delete(index="drive", ignore=[400, 404])
+        # Re-create the "drive" index.
+        await es_client.indices.create(index="drive", ignore=400)
+        return {"detail": "All drive files have been removed."}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/get_all")
+async def get_all():
+    """Get all drive."""
+    try:
+        res = await ((await get_es_client()).search(
+            index="drive", body={"query": {"match_all": {}}}
+        ))
+        # print results one by one
+        for hit in res["hits"]["hits"]:
+            print(hit["_source"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

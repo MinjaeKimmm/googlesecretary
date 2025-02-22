@@ -16,30 +16,9 @@ import json
 import os
 from markitdown import MarkItDown
 import uvicorn
+from pathlib import Path
 
 
-
-def embed_drive(root, vector_store, user_id):
-    list_all_files = []
-    for r, dirs, files in os.walk(root):
-        for file in files:
-            list_all_files.append(os.path.join(r, file))
-    md = MarkItDown(enable_plugins=False)
-    for file in list_all_files:
-        metadata = {
-            "user_id": user_id,
-            "file_path": file,
-            "file_name": os.path.basename(file),
-            "file_type": os.path.splitext(file)[1],
-            "data_source": "drive",
-        }
-        res = md.convert(os.path.join(root, file))
-        if not res.text_content or res.text_content == "" or res.text_content is None:
-            print("No content in file")
-        else:
-            document = Document(page_content=res.text_content, metadata=metadata)
-            uuid = str(uuid4())
-            vector_store.add_documents(documents=[document], ids=[uuid])
             
             
 async def embed_drive(vector_store:AsyncElasticsearchStore,  user_id:str):
@@ -53,7 +32,7 @@ async def embed_drive(vector_store:AsyncElasticsearchStore,  user_id:str):
         for file in list_all_files:
             metadata = {
                 "user_id": user_id,
-                "file_path": file,
+                "file_path": Path(file).as_posix(),
                 "file_name": os.path.basename(file),
                 "file_type": os.path.splitext(file)[1],
                 "data_source": "drive",
