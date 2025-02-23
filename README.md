@@ -2,6 +2,7 @@
 
 ![ARIA](https://github.com/user-attachments/assets/090a0da1-9fe9-4a3c-a869-5a2eeddcc098)
 [Our Presentation](https://github.com/MinjaeKimmm/googlesecretary/blob/main/ARIA_PPT.pdf)
+[Our Demo Video](https://youtu.be/idGfq8z0BLw)
 
 ARIA is an AI-powered interactive avatar assistant that leverages **Retrieval-Augmented Generation (RAG)** to provide human-like responses and dynamic interactions. Designed to be a personal assistant, ARIA seamlessly integrates knowledge retrieval, reasoning, and real-time engagement.
 
@@ -40,6 +41,13 @@ python main.py
 2. Start ARIA and interact via text or voice commands.
 3. Learn awesome features and functionalities of ARIA that makes your life easier.
 4. Use it anywhere, anytime, and enjoy the convenience of having a personal assistant.
+
+
+## 👥 Our Team
+
+| ![image](https://github.com/user-attachments/assets/96557c5a-5c1f-4cd0-b5c5-6c84bfc8dacd) | ![image](https://github.com/user-attachments/assets/0199ab3a-fd6c-405f-8724-e9fb3dec7dd6) | ![image](https://github.com/user-attachments/assets/2ee89a92-3362-4ee7-9591-891feff6c229) | ![image](https://github.com/user-attachments/assets/ffd10047-e598-4ffd-a945-3e37d5ffad5c) |
+|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
+| **[Minjae Kim](https://www.linkedin.com/in/kiminjae/)** - Backend Engineer | **[Jaeyoung Shin](https://www.linkedin.com/in/limepencil/)** - AI Engineer | **[Sumin Lee](https://www.linkedin.com/in/sum37/)** - Frontend Engineer | **[Seonuk Kim](https://www.linkedin.com/in/seonuk-kim/)** - UI/UX Designer |
 
 ## 📌 Roadmap
 
